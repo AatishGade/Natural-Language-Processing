@@ -1,0 +1,14 @@
+# Importing the Libaries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Importing the dataset
+dataset= pd.read_csv('Restaurant_reviews.tsv', delimiter = '\t', quoting = 3) 
+
+# Cleaning the texts
+import re
+import nltk #removing the unnecassary words
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer #Steaming is about taking the root of the word eg) Loved - Root word is 'LOVE'
