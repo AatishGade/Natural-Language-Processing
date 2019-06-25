@@ -1,0 +1,40 @@
+
+# Importing the Libaries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Importing the dataset
+dataset= pd.read_csv('Restaurant_reviews.tsv', delimiter = '\t', quoting = 3)
+
+# Cleaning the texts
+import re
+import nltk #removing the unnecassary words
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer #Steaming is about taking the root of the word eg) Loved - Root word is 'LOVE'
+# Testing the logic for a single index value
+review = re.sub('[^a-zA-Z]',' ',dataset['Review'][0])
+review = review.lower()
+review = review.split() # split the string in to different words, and it will be a list not a string anymore
+ps = PorterStemmer()
+review =[ps.stem(word) for word in review if not word in set(stopwords.words('english'))] #set function is used for running algorithm faster and efficiently for larger texts
+review =' '.join(review) # Join the list back to string 
+
+# Corpus is a collection of text from any source
+# Iterate through the dataset using the same logic above used
+corpus = []
+for i in range(0,1000):
+   review_all = re.sub('[^a-zA-Z]',' ',dataset['Review'][i])
+   review_all = review_all.lower()
+   review_all = review_all.split() # split the string in to different words, and it will be a list not a string anymore
+   ps1 = PorterStemmer()
+   review_all =[ps1.stem(word) for word in review_all if not word in set(stopwords.words('english'))] #set function is used for running algorithm faster and efficiently for larger texts
+   review_all =' '.join(review_all)
+   corpus.append(review_all)
+   
+# Creating the Bag of words model
+from sklearn.feature_extraction.text import CountVectorizer
+cv = CountVectorizer(max_features = 1500) #max_feautre will only 1500 words that are most relavent words, used 1500 becasue when we ran the sparse matrix without max_feautre, it gave us 1546 words so I chose top 1500 words to be carefull
+X = cv.fit_transform(corpus).toarray()
+Y = dataset.iloc[:,1].values
