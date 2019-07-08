@@ -1,0 +1,103 @@
+# Importing the Libaries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Importing the dataset
+dataset= pd.read_csv('Restaurant_reviews.tsv', delimiter = '\t', quoting = 3)
+
+# Cleaning the texts
+import re
+import nltk #removing the unnecassary words
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer #Steaming is about taking the root of the word eg) Loved - Root word is 'LOVE'
+# Testing the logic for a single index value
+review = re.sub('[^a-zA-Z]',' ',dataset['Review'][0])
+review = review.lower()
+review = review.split() # split the string in to different words, and it will be a list not a string anymore
+ps = PorterStemmer()
+review =[ps.stem(word) for word in review if not word in set(stopwords.words('english'))] #set function is used for running algorithm faster and efficiently for larger texts
+review =' '.join(review) # Join the list back to string 
+
+# Corpus is a collection of text from any source
+# Iterate through the dataset using the same logic above used
+corpus = []
+for i in range(0,1000):
+   review_all = re.sub('[^a-zA-Z]',' ',dataset['Review'][i])
+   review_all = review_all.lower()
+   review_all = review_all.split() # split the string in to different words, and it will be a list not a string anymore
+   ps1 = PorterStemmer()
+   review_all =[ps1.stem(word) for word in review_all if not word in set(stopwords.words('english'))] #set function is used for running algorithm faster and efficiently for larger texts
+   review_all =' '.join(review_all)
+   corpus.append(review_all)
+   
+# Creating the Bag of words model
+from sklearn.feature_extraction.text import CountVectorizer
+cv = CountVectorizer(max_features = 1500) #max_feautre will only 1500 words that are most relavent words, used 1500 becasue when we ran the sparse matrix without max_feautre, it gave us 1546 words so I chose top 1500 words to be carefull
+X = cv.fit_transform(corpus).toarray()
+Y = dataset.iloc[:,1].values
+
+
+# Naive-Bayes Classification 
+
+#Splitting the dataset into Training set and Test Set
+from sklearn.model_selection import train_test_split
+X_train, X_test , Y_train, Y_test = train_test_split(X,Y, test_size = 0.20, random_state = 0)
+
+
+# Fitting classifier to the training set
+from sklearn.naive_bayes import GaussianNB
+classifier = GaussianNB()
+classifier.fit(X_train,Y_train)
+
+# Predicitng the test set results
+Y_pred = classifier.predict(X_test)
+
+# Making the confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(Y_test,Y_pred)
+
+
+
+#F-Score Calculation Naive-Bayes
+False_positiveNB = cm[0][1]
+False_NegativeNB = cm[1][0]
+True_positiveNB = cm[0][0]
+True_NegativeNB = cm[1][1]
+
+AccuracyNB = (True_positiveNB + True_NegativeNB)/(True_positiveNB+True_NegativeNB+False_positiveNB+False_NegativeNB)
+PrecisionNB = True_positiveNB/(True_positiveNB+False_NegativeNB)
+RecallNB = True_positiveNB/(True_positiveNB+False_NegativeNB)
+F1_Score = 2*PrecisionNB*RecallNB/(PrecisionNB+RecallNB)
+
+# Random Forest tree
+
+
+#Splitting the dataset into Training set and Test Set
+from sklearn.model_selection import train_test_split
+X1_train, X1_test , Y1_train, Y1_test = train_test_split(X,Y, test_size = 0.20, random_state = 0)
+
+
+from sklearn.ensemble import RandomForestClassifier
+classifier1 = RandomForestClassifier(n_estimators = 20 , criterion ='entropy' , random_state =0 )
+classifier1.fit(X1_train,Y1_train)
+
+#Prediciting the new test set results
+Y_pred1 = classifier1.predict(X1_test)
+
+# Making the confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm2 = confusion_matrix(Y1_test,Y_pred1)
+
+
+#F-Score Calculation Random Forest
+False_positive = cm2[0][1]
+False_Negative = cm2[1][0]
+True_positive = cm2[0][0]
+True_Negative = cm2[1][1]
+
+Accuracy = (True_positive + True_Negative)/(True_positive+True_Negative+False_positive+False_Negative)
+Precision = True_positive/(True_positive+False_Negative)
+Recall = True_positive/(True_positive+False_Negative)
+F1_Score_1 = 2*Precision*Recall/(Precision+Recall)
